@@ -1,0 +1,51 @@
+from machine import I2C, Pin
+from time import sleep
+from pico_i2c_lcd import I2cLcd
+import random
+
+
+i2c = I2C(0, sda=Pin(0), scl=Pin(1), freq=400000)
+I2C_ADDR = i2c.scan()[0]
+lcd = I2cLcd(i2c, I2C_ADDR, 2, 16)
+
+
+button_rock = Pin(15, Pin.IN, Pin.PULL_DOWN)
+button_paper = Pin(14, Pin.IN, Pin.PULL_DOWN)
+button_scissors = Pin(10, Pin.IN, Pin.PULL_DOWN)
+
+
+lcd.clear()
+choices = ["Rock", "Paper", "Scissors"]
+
+
+def display_text(row, text):
+    text = text[:16]  
+    lcd.move_to(0, row)
+    lcd.putstr(text)
+    
+    if len(text) < 16:
+        lcd.putstr(' ' * (16 - len(text)))
+
+while True:
+    user_choice = None
+    if button_rock.value() == 1:
+        print("Rock button pressed")
+        user_choice = "Rock"
+    elif button_paper.value() == 1:
+        print("Paper button pressed")
+        user_choice = "Paper"
+    elif button_scissors.value() == 1:
+        print("Scissors button pressed")
+        user_choice = "Scissor"
+    
+    if user_choice:
+        display_text(1, "P: " + user_choice)
+        computer_choice = random.choice(choices)
+        display_text(0, "C: " + computer_choice)
+        print("User choice:", user_choice)
+        print("Computer choice:", computer_choice)
+        break
+    
+    
+    sleep(0.1)  
+
